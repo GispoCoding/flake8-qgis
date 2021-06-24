@@ -1,17 +1,16 @@
 # Core Library
+# Core Library modules
 import ast
 from typing import Set
-
-# First party
-from flake8_qgis import Plugin
-
-"""Tests for `flake8_qgis` package."""
 
 # Third party modules
 import pytest
 
 # First party modules
-import flake8_qgis
+# First party
+from flake8_qgis import Plugin
+
+"""Tests for `flake8_qgis` package."""
 
 
 def _results(s: str) -> Set[str]:
@@ -28,6 +27,19 @@ def test_plugin_version():
     assert isinstance(Plugin.version, str)
     assert "." in Plugin.version
 
+
 def test_plugin_name():
     assert isinstance(Plugin.name, str)
 
+
+def test_QGS201_pass():
+    ret = _results("from qgs.core import QgsMapLayer, QgsVectorLayer")
+    assert ret == set()
+
+
+def test_QGS201():
+    ret = _results("from qgs._core import QgsMapLayer, QgsVectorLayer")
+    assert ret == {
+        "1:0 QGS101 Use 'from qgs.core import QgsMapLayer, QgsVectorLayer' instead of "
+        "'from qgs._core import QgsMapLayer, QgsVectorLayer'"
+    }
