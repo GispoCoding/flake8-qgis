@@ -2,7 +2,6 @@ pip-tools
 pre-commit
 pytest
 pytest-cov
-pytest-mccabe
 pytest-timeout
 twine
 wheel
