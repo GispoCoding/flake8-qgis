@@ -121,7 +121,11 @@ def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
         if (
             arg.arg == "iface"
             or (hasattr(arg, "type_comment") and arg.type_comment == QGIS_INTERFACE)
-            or (arg.annotation and arg.annotation.id == QGIS_INTERFACE)  # type: ignore
+            or (
+                arg.annotation
+                and hasattr(arg.annotation, "id")
+                and arg.annotation.id == QGIS_INTERFACE  # type: ignore
+            )
         ):
             errors.append((node.lineno, node.col_offset, QGS105))
     return errors
