@@ -137,7 +137,7 @@ class SomeClass:
         pass
         """
     )
-    assert ret == {
-        "4:4 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
+    assert len(ret) == 1 and list(ret)[0].endswith(
+        "QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
         "it: 'from qgs.utils import iface'"
-    }
+    )
