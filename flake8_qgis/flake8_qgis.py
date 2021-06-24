@@ -1,8 +1,7 @@
 # Core Library modules
 import ast
 import sys
-from collections import Generator
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, List, Optional, Tuple
 
 # Third party modules
 from _ast import FunctionDef, Import
@@ -154,7 +153,7 @@ class Plugin:
     def __init__(self, tree: ast.AST) -> None:
         self._tree = tree
 
-    def run(self) -> Generator[Tuple[int, int, str, Type[Any]], None, None]:
+    def run(self):  # noqa
         visitor = Visitor()
 
         # Add parent
