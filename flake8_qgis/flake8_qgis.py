@@ -1,8 +1,7 @@
 # Core Library modules
 import ast
 import sys
-from collections import Generator
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, List, Optional, Tuple
 
 # Third party modules
 from _ast import FunctionDef, Import
@@ -121,7 +120,7 @@ def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
     for arg in node.args.args:
         if (
             arg.arg == "iface"
-            or arg.type_comment == QGIS_INTERFACE
+            or (hasattr(arg, "type_comment") and arg.type_comment == QGIS_INTERFACE)
             or (arg.annotation and arg.annotation.id == QGIS_INTERFACE)  # type: ignore
         ):
             errors.append((node.lineno, node.col_offset, QGS105))
@@ -154,7 +153,7 @@ class Plugin:
     def __init__(self, tree: ast.AST) -> None:
         self._tree = tree
 
-    def run(self) -> Generator[Tuple[int, int, str, Type[Any]], None, None]:
+    def run(self):  # noqa
         visitor = Visitor()
 
         # Add parent
