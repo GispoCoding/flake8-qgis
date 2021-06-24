@@ -2,21 +2,72 @@
 import ast
 import sys
 from collections import Generator
-from typing import Any, List, Tuple, Type
+from typing import Any, List, Optional, Tuple, Type
 
-if sys.version_info < (3, 8):  # pragma: no cover (<PY38)
-    # Third party
+# Third party modules
+from _ast import Import
+
+if sys.version_info < (3, 8):
     # Third party modules
     import importlib_metadata
-else:  # pragma: no cover (PY38+)
-    # Core Library
+else:
     # Core Library modules
     import importlib.metadata as importlib_metadata
 
-QGS101 = (
-    "QGS101 Use 'from {correct_module} import {members}' "
+QGS101_AND_QGS103 = (
+    "{code} Use 'from {correct_module} import {members}' "
     "instead of 'from {module} import {members}'"
 )
+QGS102_AND_QGS104 = "{code} Use 'import {correct}' " "instead of 'import {incorrect}'"
+
+
+def _get_qgs101_and_103(
+    node: ast.ImportFrom, code: str, package: str, correct_package: Optional[str] = None
+) -> List[Tuple[int, int, str]]:
+    errors: List[Tuple[int, int, str]] = []
+    if node.module is None or not node.module.startswith(package):
+        return errors
+    errors.append(
+        (
+            node.lineno,
+            node.col_offset,
+            QGS101_AND_QGS103.format(
+                code=code,
+                module=node.module,
+                correct_module=node.module.replace("._", ".")
+                if correct_package is None
+                else correct_package,
+                members=", ".join([alias.name for alias in node.names]),
+            ),
+        )
+    )
+    return errors
+
+
+def _get_qgs102_and_qgs104(
+    node: ast.Import, code: str, package: str, correct_package: Optional[str] = None
+) -> List[Tuple[int, int, str]]:
+    """
+    Get a list of calls where access to a protected member of a class qgs is imported.
+    eg. 'import qgs._core...' or 'import qgs._qui...'
+    """
+    errors: List[Tuple[int, int, str]] = []
+    for alias in node.names:
+        if alias.name.startswith(package):
+            errors.append(
+                (
+                    node.lineno,
+                    node.col_offset,
+                    QGS102_AND_QGS104.format(
+                        code=code,
+                        correct=alias.name.replace("._", ".")
+                        if correct_package is None
+                        else alias.name.replace(package, correct_package),
+                        incorrect=alias.name,
+                    ),
+                )
+            )
+    return errors
 
 
 def _get_qgs101(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
@@ -24,20 +75,38 @@ def _get_qgs101(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
     Get a list of calls where access to a protected member of a class qgs is imported.
     eg. 'from qgs._core import ...' or 'from qgs._qui import ...'
     """
+    return _get_qgs101_and_103(node, "QGS101", "qgs._")
+
+
+def _get_qgs102(node: ast.Import) -> List[Tuple[int, int, str]]:
+    """
+    Get a list of calls where access to a protected member of a class qgs is imported.
+    eg. 'import qgs._core...' or 'import qgs._qui...'
+    """
+    return _get_qgs102_and_qgs104(node, "QGS102", "qgs._")
+
+
+def _get_qgs103(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
+    """
+    Get a list of calls where PyQt is directly imported.
+    """
     errors: List[Tuple[int, int, str]] = []
-    if node.module is None or not node.module.startswith("qgs._"):
-        return errors
-    errors.append(
-        (
-            node.lineno,
-            node.col_offset,
-            QGS101.format(
-                module=node.module,
-                correct_module=node.module.replace("_", ""),
-                members=", ".join([alias.name for alias in node.names]),
-            ),
+    for qt_version_num in (4, 5, 6):
+        errors += _get_qgs101_and_103(
+            node, "QGS103", f"PyQt{qt_version_num}", "qgis.PyQt"
         )
-    )
+    return errors
+
+
+def _get_qgs104(node: ast.Import) -> List[Tuple[int, int, str]]:
+    """
+    Get a list of calls where PyQt is directly imported.
+    """
+    errors: List[Tuple[int, int, str]] = []
+    for qt_version_num in (4, 5, 6):
+        errors += _get_qgs102_and_qgs104(
+            node, "QGS104", f"PyQt{qt_version_num}", "qgis.PyQt"
+        )
     return errors
 
 
@@ -47,6 +116,12 @@ class Visitor(ast.NodeVisitor):
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> Any:  # noqa N802
         self.errors += _get_qgs101(node)
+        self.errors += _get_qgs103(node)
+        self.generic_visit(node)
+
+    def visit_Import(self, node: Import) -> Any:  # noqa N802
+        self.errors += _get_qgs102(node)
+        self.errors += _get_qgs104(node)
         self.generic_visit(node)
 
 
