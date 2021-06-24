@@ -94,8 +94,9 @@ def some_function(somearg, iface):
     # do something with iface
 
 
-# Good
+# Good: iface imported
 from qgis.utils import iface
+
 def some_function(somearg):
-    # iface imported
+    # do something with iface
 ```
