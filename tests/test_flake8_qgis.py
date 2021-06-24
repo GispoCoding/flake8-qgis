@@ -86,3 +86,58 @@ def test_QGS104():
         "1:0 QGS104 Use 'import qgis.PyQt.QtCore.pyqtSignal' instead of 'import "
         "PyQt5.QtCore.pyqtSignal'"
     }
+
+
+def test_QGS105():
+    ret = _results(
+        """
+def some_function(somearg, iface):
+    pass
+        """
+    )
+    assert ret == {
+        "2:0 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
+        "it: 'from qgs.utils import iface'"
+    }
+
+
+def test_QGS105_typed():
+    ret = _results(
+        """
+def some_function(somearg, interface: QgisInterface):
+    pass
+        """
+    )
+    assert ret == {
+        "2:0 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
+        "it: 'from qgs.utils import iface'"
+    }
+
+
+def test_QGS105_method():
+    ret = _results(
+        """
+class SomeClass:
+    def some_method(self, somearg, iface):
+        pass
+        """
+    )
+    assert ret == {
+        "3:4 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
+        "it: 'from qgs.utils import iface'"
+    }
+
+
+def test_QGS105_static_method():
+    ret = _results(
+        """
+class SomeClass:
+    @staticmethod
+    def some_method(somearg, iface):
+        pass
+        """
+    )
+    assert ret == {
+        "4:4 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
+        "it: 'from qgs.utils import iface'"
+    }

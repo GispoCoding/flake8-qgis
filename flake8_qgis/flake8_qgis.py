@@ -5,7 +5,9 @@ from collections import Generator
 from typing import Any, List, Optional, Tuple, Type
 
 # Third party modules
-from _ast import Import
+from _ast import FunctionDef, Import
+
+QGIS_INTERFACE = "QgisInterface"
 
 if sys.version_info < (3, 8):
     # Third party modules
@@ -19,6 +21,10 @@ QGS101_AND_QGS103 = (
     "instead of 'from {module} import {members}'"
 )
 QGS102_AND_QGS104 = "{code} Use 'import {correct}' " "instead of 'import {incorrect}'"
+QGS105 = (
+    "QGS105 Do not pass iface (QgisInterface) as an argument, "
+    "instead import it: 'from qgs.utils import iface'"
+)
 
 
 def _get_qgs101_and_103(
@@ -110,6 +116,18 @@ def _get_qgs104(node: ast.Import) -> List[Tuple[int, int, str]]:
     return errors
 
 
+def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
+    errors: List[Tuple[int, int, str]] = []
+    for arg in node.args.args:
+        if (
+            arg.arg == "iface"
+            or arg.type_comment == QGIS_INTERFACE
+            or (arg.annotation and arg.annotation.id == QGIS_INTERFACE)  # type: ignore
+        ):
+            errors.append((node.lineno, node.col_offset, QGS105))
+    return errors
+
+
 class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.errors: List[Tuple[int, int, str]] = []
@@ -122,6 +140,10 @@ class Visitor(ast.NodeVisitor):
     def visit_Import(self, node: Import) -> Any:  # noqa N802
         self.errors += _get_qgs102(node)
         self.errors += _get_qgs104(node)
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: FunctionDef) -> Any:  # noqa N802
+        self.errors += _get_qgs105(node)
         self.generic_visit(node)
 
 
