@@ -3,9 +3,6 @@
 import ast
 from typing import Set
 
-# Third party modules
-import pytest
-
 # First party modules
 # First party
 from flake8_qgis import Plugin
@@ -68,9 +65,9 @@ def test_QGS103():
     ret = _results("from PyQt5.QtCore import pyqtSignal")
     ret = ret.union(_results("from PyQt6.QtWidgets import QCheckBox"))
     assert ret == {
-        "1:0 QGS103 Use 'from qgis.PyQt import QCheckBox' instead of 'from "
+        "1:0 QGS103 Use 'from qgis.PyQt.QtWidgets import QCheckBox' instead of 'from "
         "PyQt6.QtWidgets import QCheckBox'",
-        "1:0 QGS103 Use 'from qgis.PyQt import pyqtSignal' instead of 'from "
+        "1:0 QGS103 Use 'from qgis.PyQt.QtCore import pyqtSignal' instead of 'from "
         "PyQt5.QtCore import pyqtSignal'",
     }
 

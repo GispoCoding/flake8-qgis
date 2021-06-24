@@ -41,7 +41,7 @@ def _get_qgs101_and_103(
                 module=node.module,
                 correct_module=node.module.replace("._", ".")
                 if correct_package is None
-                else correct_package,
+                else node.module.replace(package, correct_package),
                 members=", ".join([alias.name for alias in node.names]),
             ),
         )
