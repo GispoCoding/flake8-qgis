@@ -1,5 +1,5 @@
 # flake8_qgis
-![CI](https://github.com/GispoCoding/lake8-qgis/workflows/CI/badge.svg)
+![CI](https://github.com/GispoCoding/flake8-qgis/workflows/CI/badge.svg)
 [![Code on Github](https://img.shields.io/badge/Code-GitHub-brightgreen)](https://github.com/MartinThoma/flake8-simplify)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
