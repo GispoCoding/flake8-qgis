@@ -6,6 +6,8 @@ from typing import Any, List, Optional, Tuple
 # Third party modules
 from _ast import FunctionDef, Import
 
+CLASS_FACTORY = "classFactory"
+
 QGIS_INTERFACE = "QgisInterface"
 
 if sys.version_info < (3, 8):
@@ -117,6 +119,8 @@ def _get_qgs104(node: ast.Import) -> List[Tuple[int, int, str]]:
 
 def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
     errors: List[Tuple[int, int, str]] = []
+    if node.name == CLASS_FACTORY:
+        return errors
     for arg in node.args.args:
         if (
             arg.arg == "iface"

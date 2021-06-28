@@ -28,8 +28,8 @@ Just call `flake8 .` in your package or `flake your.py`.
 
 ## Rules
 
-* `QGS101`: Don't use from-imports from qgis projected members ([example](#QGS101))
-* `QGS102`: Don't use imports from qgis projected members ([example](#QGS102))
+* `QGS101`: Don't use from-imports from qgis protected members ([example](#QGS101))
+* `QGS102`: Don't use imports from qgis protected members ([example](#QGS102))
 * `QGS103`: Don't use from-imports from PyQt directly ([example](#QGS103))
 * `QGS104`: Don't use imports from PyQt directly ([example](#QGS104))
 * `QGS105`: Don't pass QgisInterface as an argument ([example](#QGS105))
@@ -99,4 +99,10 @@ from qgis.utils import iface
 
 def some_function(somearg):
     # do something with iface
+```
+
+```python
+# in classFactory the passing is OK, since QGIS injects it
+def classFactory(iface):
+    # preferably do not pass the iface to plugin
 ```

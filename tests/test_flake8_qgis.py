@@ -85,6 +85,16 @@ def test_QGS104():
     }
 
 
+def test_QGS105_pass():
+    ret = _results(
+        """
+def classFactory(iface):
+    pass
+        """
+    )
+    assert ret == set()
+
+
 def test_QGS105():
     ret = _results(
         """
