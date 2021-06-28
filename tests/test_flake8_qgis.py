@@ -36,9 +36,12 @@ def test_QGS101_pass():
 
 def test_QGS101():
     ret = _results("from qgs._core import QgsMapLayer, QgsVectorLayer")
+    ret = ret.union(_results("from qgis._core import QgsApplication"))
     assert ret == {
+        "1:0 QGS101 Use 'from qgis.core import QgsApplication' instead of 'from "
+        "qgis._core import QgsApplication'",
         "1:0 QGS101 Use 'from qgs.core import QgsMapLayer, QgsVectorLayer' instead of "
-        "'from qgs._core import QgsMapLayer, QgsVectorLayer'"
+        "'from qgs._core import QgsMapLayer, QgsVectorLayer'",
     }
 
 

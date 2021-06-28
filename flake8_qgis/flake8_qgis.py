@@ -82,7 +82,9 @@ def _get_qgs101(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
     Get a list of calls where access to a protected member of a class qgs is imported.
     eg. 'from qgs._core import ...' or 'from qgs._qui import ...'
     """
-    return _get_qgs101_and_103(node, "QGS101", "qgs._")
+    return _get_qgs101_and_103(node, "QGS101", "qgs._") + _get_qgs101_and_103(
+        node, "QGS101", "qgis._"
+    )
 
 
 def _get_qgs102(node: ast.Import) -> List[Tuple[int, int, str]]:
@@ -90,7 +92,9 @@ def _get_qgs102(node: ast.Import) -> List[Tuple[int, int, str]]:
     Get a list of calls where access to a protected member of a class qgs is imported.
     eg. 'import qgs._core...' or 'import qgs._qui...'
     """
-    return _get_qgs102_and_qgs104(node, "QGS102", "qgs._")
+    return _get_qgs102_and_qgs104(node, "QGS102", "qgs._") + _get_qgs102_and_qgs104(
+        node, "QGS102", "qgis._"
+    )
 
 
 def _get_qgs103(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
