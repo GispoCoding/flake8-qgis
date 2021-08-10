@@ -33,6 +33,8 @@ Just call `flake8 .` in your package or `flake your.py`.
 * `QGS103`: Don't use from-imports from PyQt directly ([example](#QGS103))
 * `QGS104`: Don't use imports from PyQt directly ([example](#QGS104))
 * `QGS105`: Don't pass QgisInterface as an argument ([example](#QGS105))
+* `QGS106`: Don't import gdal directly, import if from osgeo package ([example](#QGS106))
+
 
 
 You might have good reasons to ignore some rules.
@@ -107,4 +109,15 @@ def some_function(somearg):
 # in classFactory the passing is OK, since QGIS injects it
 def classFactory(iface):
     # preferably do not pass the iface to plugin
+```
+
+### QGS106
+
+```python
+# Bad
+import gdal
+import ogr
+
+# Good
+from osgeo import gdal
 ```

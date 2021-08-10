@@ -151,3 +151,18 @@ class SomeClass:
         "QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
         "it: 'from qgs.utils import iface'"
     )
+
+
+def test_QGS106_pass():
+    ret = _results("from osgeo import gdal")
+    ret = ret.union(_results("from osgeo import ogr"))
+    assert ret == set()
+
+
+def test_QGS106():
+    ret = _results("import gdal")
+    ret = ret.union(_results("import ogr"))
+    assert ret == {
+        "1:0 QGS106 Use 'from osgeo import gdal' instead of 'import gdal'",
+        "1:0 QGS106 Use 'from osgeo import ogr' instead of 'import ogr'",
+    }

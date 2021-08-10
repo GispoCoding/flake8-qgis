@@ -26,6 +26,7 @@ QGS105 = (
     "QGS105 Do not pass iface (QgisInterface) as an argument, "
     "instead import it: 'from qgs.utils import iface'"
 )
+QGS106 = "QGS106 Use 'from osgeo import {members}' " "instead of 'import {members}'"
 
 
 def _get_qgs101_and_103(
@@ -139,6 +140,20 @@ def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
     return errors
 
 
+def _get_qgs106(node: ast.Import) -> List[Tuple[int, int, str]]:
+    errors: List[Tuple[int, int, str]] = []
+    for alias in node.names:
+        if alias.name in ("gdal", "ogr"):
+            errors.append(
+                (
+                    node.lineno,
+                    node.col_offset,
+                    QGS106.format(members=alias.name),
+                )
+            )
+    return errors
+
+
 class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.errors: List[Tuple[int, int, str]] = []
@@ -151,6 +166,7 @@ class Visitor(ast.NodeVisitor):
     def visit_Import(self, node: Import) -> Any:  # noqa N802
         self.errors += _get_qgs102(node)
         self.errors += _get_qgs104(node)
+        self.errors += _get_qgs106(node)
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node: FunctionDef) -> Any:  # noqa N802
