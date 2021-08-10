@@ -107,7 +107,7 @@ def some_function(somearg, iface):
     )
     assert ret == {
         "2:0 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgs.utils import iface'"
+        "it: 'from qgis.utils import iface'"
     }
 
 
@@ -120,7 +120,7 @@ def some_function(somearg, interface: QgisInterface):
     )
     assert ret == {
         "2:0 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgs.utils import iface'"
+        "it: 'from qgis.utils import iface'"
     }
 
 
@@ -134,7 +134,7 @@ class SomeClass:
     )
     assert ret == {
         "3:4 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgs.utils import iface'"
+        "it: 'from qgis.utils import iface'"
     }
 
 
@@ -149,7 +149,7 @@ class SomeClass:
     )
     assert len(ret) == 1 and list(ret)[0].endswith(
         "QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgs.utils import iface'"
+        "it: 'from qgis.utils import iface'"
     )
 
 

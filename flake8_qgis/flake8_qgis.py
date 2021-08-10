@@ -24,7 +24,7 @@ QGS101_AND_QGS103 = (
 QGS102_AND_QGS104 = "{code} Use 'import {correct}' " "instead of 'import {incorrect}'"
 QGS105 = (
     "QGS105 Do not pass iface (QgisInterface) as an argument, "
-    "instead import it: 'from qgs.utils import iface'"
+    "instead import it: 'from qgis.utils import iface'"
 )
 QGS106 = "QGS106 Use 'from osgeo import {members}' " "instead of 'import {members}'"
 
