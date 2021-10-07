@@ -147,7 +147,8 @@ class SomeClass:
         pass
         """
     )
-    assert len(ret) == 1 and list(ret)[0].endswith(
+    assert len(ret) == 1
+    assert list(ret)[0].endswith(
         "QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
         "it: 'from qgis.utils import iface'"
     )
