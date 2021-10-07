@@ -1,5 +1,6 @@
 # flake8-qgis
 [![PyPI version](https://badge.fury.io/py/flake8-qgis.svg)](https://badge.fury.io/py/flake8-qgis)
+[![Downloads](https://img.shields.io/pypi/dm/flake8-qgis.svg)](https://pypistats.org/packages/flake8-qgis)
 ![CI](https://github.com/GispoCoding/flake8-qgis/workflows/CI/badge.svg)
 [![Code on Github](https://img.shields.io/badge/Code-GitHub-brightgreen)](https://github.com/GispoCoding/flake8-qgis)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
