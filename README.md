@@ -53,11 +53,11 @@ ignore = QGS101, QGS102
 
 ```python
 # Bad
-from qgs._core import QgsMapLayer, QgsVectorLayer
+from qgis._core import QgsMapLayer, QgsVectorLayer
 from qgis._core import QgsApplication
 
 # Good
-from qgs.core import QgsMapLayer, QgsVectorLayer
+from qgis.core import QgsMapLayer, QgsVectorLayer
 from qgis.core import QgsApplication
 ```
 
@@ -65,10 +65,10 @@ from qgis.core import QgsApplication
 
 ```python
 # Bad
-import qgs._core.QgsVectorLayer as QgsVectorLayer
+import qgis._core.QgsVectorLayer as QgsVectorLayer
 
 # Good
-import qgs.core.QgsVectorLayer as QgsVectorLayer
+import qgis.core.QgsVectorLayer as QgsVectorLayer
 ```
 
 ### QGS103
