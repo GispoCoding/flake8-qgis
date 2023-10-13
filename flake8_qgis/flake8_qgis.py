@@ -1,10 +1,8 @@
 # Core Library modules
 import ast
 import sys
-from typing import Any, List, Optional, Tuple
-
-# Third party modules
 from _ast import FunctionDef, Import
+from typing import Any, List, Optional, Tuple
 
 CLASS_FACTORY = "classFactory"
 
@@ -21,12 +19,12 @@ QGS101_AND_QGS103 = (
     "{code} Use 'from {correct_module} import {members}' "
     "instead of 'from {module} import {members}'"
 )
-QGS102_AND_QGS104 = "{code} Use 'import {correct}' " "instead of 'import {incorrect}'"
+QGS102_AND_QGS104 = "{code} Use 'import {correct}' instead of 'import {incorrect}'"
 QGS105 = (
     "QGS105 Do not pass iface (QgisInterface) as an argument, "
     "instead import it: 'from qgis.utils import iface'"
 )
-QGS106 = "QGS106 Use 'from osgeo import {members}' " "instead of 'import {members}'"
+QGS106 = "QGS106 Use 'from osgeo import {members}' instead of 'import {members}'"
 
 
 def _get_qgs101_and_103(
@@ -133,7 +131,7 @@ def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
             or (
                 arg.annotation
                 and hasattr(arg.annotation, "id")
-                and arg.annotation.id == QGIS_INTERFACE  # type: ignore
+                and arg.annotation.id == QGIS_INTERFACE
             )
         ):
             errors.append((node.lineno, node.col_offset, QGS105))
