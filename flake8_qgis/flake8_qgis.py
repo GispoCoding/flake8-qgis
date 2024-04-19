@@ -68,7 +68,7 @@ def _test_pyqt_module(module: Optional[str]) -> Optional[str]:
     return None
 
 
-def _test_module_at_from_import(
+def _test_module_at_import_from(
     error_code: str,
     node: ast.ImportFrom,
     tester: Callable[[Optional[str]], Optional[str]],
@@ -139,8 +139,8 @@ class Visitor(ast.NodeVisitor):
         self.errors: List["FlakeError"] = []
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
-        self.errors += _test_module_at_from_import("QGS101", node, _test_qgis_module)
-        self.errors += _test_module_at_from_import("QGS103", node, _test_pyqt_module)
+        self.errors += _test_module_at_import_from("QGS101", node, _test_qgis_module)
+        self.errors += _test_module_at_import_from("QGS103", node, _test_pyqt_module)
         self.generic_visit(node)
 
     def visit_Import(self, node: Import) -> None:  # noqa: N802
