@@ -50,7 +50,8 @@ def _test_qgis_module(module: Optional[str]) -> Optional[str]:
         return None
 
     if modules[0] in ("qgs", "qgis") and modules[1].startswith("_"):
-        modules[1] = modules[1].removeprefix("_")
+
+        modules[1] = modules[1][1:]
         return ".".join(modules)
 
     return None
