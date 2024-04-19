@@ -49,7 +49,11 @@ def _test_qgis_module(module: Optional[str]) -> Optional[str]:
     if len(modules) < 2:
         return None
 
-    if modules[0] in ("qgs", "qgis") and modules[1].startswith("_"):
+    if (
+        modules[0] in ("qgs", "qgis")
+        and modules[1].startswith("_")
+        and modules[1] != "_3d"
+    ):
         modules[1] = modules[1][1:]
         return ".".join(modules)
 

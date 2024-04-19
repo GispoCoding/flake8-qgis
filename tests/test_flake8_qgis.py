@@ -34,6 +34,11 @@ def test_QGS101_pass():
     assert ret == set()
 
 
+def test_QGS101_pass_with_3d_exception():
+    ret = _results("from qgis._3d import *")
+    assert ret == set()
+
+
 def test_QGS101():
     ret = _results("from qgs._core import QgsMapLayer, QgsVectorLayer")
     ret = ret.union(_results("from qgis._core import QgsApplication"))
