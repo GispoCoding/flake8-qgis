@@ -1,8 +1,22 @@
 # Core Library modules
 import ast
+import re
 import sys
 from _ast import FunctionDef, Import
-from typing import Any, List, Optional, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+)
+
+if TYPE_CHECKING:
+    FlakeError = Tuple[int, int, str]
+
 
 CLASS_FACTORY = "classFactory"
 
@@ -15,11 +29,11 @@ else:
     # Core Library modules
     import importlib.metadata as importlib_metadata
 
-QGS101_AND_QGS103 = (
+FROM_IMPORT_USE_INSTEAD_OF = (
     "{code} Use 'from {correct_module} import {members}' "
     "instead of 'from {module} import {members}'"
 )
-QGS102_AND_QGS104 = "{code} Use 'import {correct}' instead of 'import {incorrect}'"
+IMPORT_USE_INSTEAD_OF = "{code} Use 'import {correct}' instead of 'import {incorrect}'"
 QGS105 = (
     "QGS105 Do not pass iface (QgisInterface) as an argument, "
     "instead import it: 'from qgis.utils import iface'"
@@ -27,101 +41,69 @@ QGS105 = (
 QGS106 = "QGS106 Use 'from osgeo import {members}' instead of 'import {members}'"
 
 
-def _get_qgs101_and_103(
-    node: ast.ImportFrom, code: str, package: str, correct_package: Optional[str] = None
-) -> List[Tuple[int, int, str]]:
-    errors: List[Tuple[int, int, str]] = []
-    if node.module is None or not node.module.startswith(package):
-        return errors
-    errors.append(
-        (
-            node.lineno,
-            node.col_offset,
-            QGS101_AND_QGS103.format(
-                code=code,
-                module=node.module,
-                correct_module=node.module.replace("._", ".")
-                if correct_package is None
-                else node.module.replace(package, correct_package),
-                members=", ".join([alias.name for alias in node.names]),
-            ),
+def _test_qgis_module(module: Optional[str]) -> Optional[str]:
+    if module is None:
+        return None
+
+    modules = module.split(".")
+    if len(modules) < 2:
+        return None
+
+    if modules[0] in ("qgs", "qgis") and modules[1].startswith("_"):
+        modules[1] = modules[1][1:]
+        return ".".join(modules)
+
+    return None
+
+
+def _test_pyqt_module(module: Optional[str]) -> Optional[str]:
+    if module is None:
+        return None
+
+    modules = module.split(".")
+    if re.match(r"^PyQt[456]$", modules[0]):
+        modules[0] = "qgis.PyQt"
+        return ".".join(modules)
+
+    return None
+
+
+def _test_module_at_import_from(
+    error_code: str,
+    node: ast.ImportFrom,
+    tester: Callable[[Optional[str]], Optional[str]],
+) -> List["FlakeError"]:
+    fixed_module_name = tester(node.module)
+    if fixed_module_name:
+        message = FROM_IMPORT_USE_INSTEAD_OF.format(
+            code=error_code,
+            correct_module=fixed_module_name,
+            module=node.module,
+            members=", ".join([alias.name for alias in node.names]),
         )
-    )
-    return errors
+
+        return [(node.lineno, node.col_offset, message)]
+
+    return []
 
 
-def _get_qgs102_and_qgs104(
-    node: ast.Import, code: str, package: str, correct_package: Optional[str] = None
-) -> List[Tuple[int, int, str]]:
-    """
-    Get a list of calls where access to a protected member of a class qgs is imported.
-    eg. 'import qgs._core...' or 'import qgs._qui...'
-    """
-    errors: List[Tuple[int, int, str]] = []
+def _test_module_at_import(
+    error_code: str, node: ast.Import, tester: Callable[[Optional[str]], Optional[str]]
+) -> List["FlakeError"]:
+    errors: List["FlakeError"] = []
     for alias in node.names:
-        if alias.name.startswith(package):
-            errors.append(
-                (
-                    node.lineno,
-                    node.col_offset,
-                    QGS102_AND_QGS104.format(
-                        code=code,
-                        correct=alias.name.replace("._", ".")
-                        if correct_package is None
-                        else alias.name.replace(package, correct_package),
-                        incorrect=alias.name,
-                    ),
-                )
+        fixed_module_name = tester(alias.name)
+        if fixed_module_name:
+            message = IMPORT_USE_INSTEAD_OF.format(
+                code=error_code, correct=fixed_module_name, incorrect=alias.name
             )
+            errors.append((node.lineno, node.col_offset, message))
+
     return errors
 
 
-def _get_qgs101(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
-    """
-    Get a list of calls where access to a protected member of a class qgs is imported.
-    eg. 'from qgs._core import ...' or 'from qgs._qui import ...'
-    """
-    return _get_qgs101_and_103(node, "QGS101", "qgs._") + _get_qgs101_and_103(
-        node, "QGS101", "qgis._"
-    )
-
-
-def _get_qgs102(node: ast.Import) -> List[Tuple[int, int, str]]:
-    """
-    Get a list of calls where access to a protected member of a class qgs is imported.
-    eg. 'import qgs._core...' or 'import qgs._qui...'
-    """
-    return _get_qgs102_and_qgs104(node, "QGS102", "qgs._") + _get_qgs102_and_qgs104(
-        node, "QGS102", "qgis._"
-    )
-
-
-def _get_qgs103(node: ast.ImportFrom) -> List[Tuple[int, int, str]]:
-    """
-    Get a list of calls where PyQt is directly imported.
-    """
-    errors: List[Tuple[int, int, str]] = []
-    for qt_version_num in (4, 5, 6):
-        errors += _get_qgs101_and_103(
-            node, "QGS103", f"PyQt{qt_version_num}", "qgis.PyQt"
-        )
-    return errors
-
-
-def _get_qgs104(node: ast.Import) -> List[Tuple[int, int, str]]:
-    """
-    Get a list of calls where PyQt is directly imported.
-    """
-    errors: List[Tuple[int, int, str]] = []
-    for qt_version_num in (4, 5, 6):
-        errors += _get_qgs102_and_qgs104(
-            node, "QGS104", f"PyQt{qt_version_num}", "qgis.PyQt"
-        )
-    return errors
-
-
-def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
-    errors: List[Tuple[int, int, str]] = []
+def _get_qgs105(node: ast.FunctionDef) -> List["FlakeError"]:
+    errors: List["FlakeError"] = []
     if node.name == CLASS_FACTORY:
         return errors
     for arg in node.args.args:
@@ -138,8 +120,8 @@ def _get_qgs105(node: ast.FunctionDef) -> List[Tuple[int, int, str]]:
     return errors
 
 
-def _get_qgs106(node: ast.Import) -> List[Tuple[int, int, str]]:
-    errors: List[Tuple[int, int, str]] = []
+def _get_qgs106(node: ast.Import) -> List["FlakeError"]:
+    errors: List["FlakeError"] = []
     for alias in node.names:
         if alias.name in ("gdal", "ogr"):
             errors.append(
@@ -154,20 +136,20 @@ def _get_qgs106(node: ast.Import) -> List[Tuple[int, int, str]]:
 
 class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
-        self.errors: List[Tuple[int, int, str]] = []
+        self.errors: List["FlakeError"] = []
 
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> Any:  # noqa N802
-        self.errors += _get_qgs101(node)
-        self.errors += _get_qgs103(node)
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
+        self.errors += _test_module_at_import_from("QGS101", node, _test_qgis_module)
+        self.errors += _test_module_at_import_from("QGS103", node, _test_pyqt_module)
         self.generic_visit(node)
 
-    def visit_Import(self, node: Import) -> Any:  # noqa N802
-        self.errors += _get_qgs102(node)
-        self.errors += _get_qgs104(node)
+    def visit_Import(self, node: Import) -> None:  # noqa: N802
+        self.errors += _test_module_at_import("QGS102", node, _test_qgis_module)
+        self.errors += _test_module_at_import("QGS104", node, _test_pyqt_module)
         self.errors += _get_qgs106(node)
         self.generic_visit(node)
 
-    def visit_FunctionDef(self, node: FunctionDef) -> Any:  # noqa N802
+    def visit_FunctionDef(self, node: FunctionDef) -> None:  # noqa: N802
         self.errors += _get_qgs105(node)
         self.generic_visit(node)
 
@@ -179,7 +161,7 @@ class Plugin:
     def __init__(self, tree: ast.AST) -> None:
         self._tree = tree
 
-    def run(self):  # noqa
+    def run(self) -> Generator[Tuple[int, int, str, Type[Any]], None, None]:
         visitor = Visitor()
 
         # Add parent
