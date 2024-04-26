@@ -33,8 +33,9 @@ Just call `flake8 .` in your package or `flake your.py`.
 * `QGS102`: Don't use imports from qgis protected members ([example](#QGS102))
 * `QGS103`: Don't use from-imports from PyQt directly ([example](#QGS103))
 * `QGS104`: Don't use imports from PyQt directly ([example](#QGS104))
-* `QGS105`: Don't pass QgisInterface as an argument ([example](#QGS105))
+* `QGS105`: Don't pass QgisInterface as an argument ([example](#QGS105)). If you want to use this rule, disable rule `QGS107`.
 * `QGS106`: Don't import gdal directly, import if from osgeo package ([example](#QGS106))
+* `QGS107`: Don't import QgisInterface instance (iface). Instead pass it as an argument ([example](#QGS107)). If you want to use this rule, disable rule `QGS105`.
 
 
 
@@ -43,9 +44,14 @@ To do that, use the standard Flake8 configuration. For example, within the `setu
 
 ```python
 [flake8]
-ignore = QGS101, QGS102
+ignore = QGS101, QGS107
 ```
 
+## Rule exclusive choices
+For QgisInterface, activate only `QGS105` OR `QGS107`, do not enable both as they cancel each other's out. If you want to use both approaches mixed, simply ignore both rules.
+Both ways of getting iface are valid, but there might be valid reason to chooce which one to use.
+* `QGS105`: it is much easier to import QgisInterface and it's easier to [mock](https://github.com/GispoCoding/pytest-qgis#hooks) it as well when writing tests. This approach is not however documented properly, so the API might change at some point to exclude this.
+* `QGS107`: this is the documented way of getting QgisInterface in plugins. However it requires writing more code.
 
 ## Examples
 
@@ -121,4 +127,18 @@ import ogr
 
 # Good
 from osgeo import gdal
+```
+
+### QGS107
+
+```python
+# Bad: iface imported
+from qgis.utils import iface
+
+def some_function(somearg):
+# do something with iface
+
+# Good: iface passed as argument
+def some_function(somearg, iface):
+    # do something with iface
 ```

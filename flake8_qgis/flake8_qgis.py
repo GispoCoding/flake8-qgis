@@ -36,9 +36,13 @@ FROM_IMPORT_USE_INSTEAD_OF = (
 IMPORT_USE_INSTEAD_OF = "{code} Use 'import {correct}' instead of 'import {incorrect}'"
 QGS105 = (
     "QGS105 Do not pass iface (QgisInterface) as an argument, "
-    "instead import it: 'from qgis.utils import iface'"
+    "instead import it: 'from qgis.utils import iface' or use the rule QGS107"
 )
 QGS106 = "QGS106 Use 'from osgeo import {members}' instead of 'import {members}'"
+QGS107 = (
+    "QGS107 Do not import iface (QgisInterface), instead "
+    "pass it as an argument or use the rule QGS105"
+)
 
 
 def _test_qgis_module(module: Optional[str]) -> Optional[str]:
@@ -138,6 +142,13 @@ def _get_qgs106(node: ast.Import) -> List["FlakeError"]:
     return errors
 
 
+def _get_qgs107(node: ast.ImportFrom) -> List["FlakeError"]:
+    errors: List["FlakeError"] = []
+    if node.module == "qgis.utils" and "iface" in [name.name for name in node.names]:
+        errors.append((node.lineno, node.col_offset, QGS107))
+    return errors
+
+
 class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.errors: List["FlakeError"] = []
@@ -145,6 +156,7 @@ class Visitor(ast.NodeVisitor):
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
         self.errors += _test_module_at_import_from("QGS101", node, _test_qgis_module)
         self.errors += _test_module_at_import_from("QGS103", node, _test_pyqt_module)
+        self.errors += _get_qgs107(node)
         self.generic_visit(node)
 
     def visit_Import(self, node: Import) -> None:  # noqa: N802

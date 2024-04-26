@@ -6,6 +6,7 @@ from typing import Set
 # First party modules
 # First party
 from flake8_qgis import Plugin
+from flake8_qgis.flake8_qgis import QGS105, QGS107
 
 """Tests for `flake8_qgis` package."""
 
@@ -110,10 +111,7 @@ def some_function(somearg, iface):
     pass
         """
     )
-    assert ret == {
-        "2:0 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgis.utils import iface'"
-    }
+    assert ret == {"2:0 " + QGS105}
 
 
 def test_QGS105_typed():
@@ -123,10 +121,7 @@ def some_function(somearg, interface: QgisInterface):
     pass
         """
     )
-    assert ret == {
-        "2:0 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgis.utils import iface'"
-    }
+    assert ret == {"2:0 " + QGS105}
 
 
 def test_QGS105_method():
@@ -137,10 +132,7 @@ class SomeClass:
         pass
         """
     )
-    assert ret == {
-        "3:4 QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgis.utils import iface'"
-    }
+    assert ret == {"3:4 " + QGS105}
 
 
 def test_QGS105_static_method():
@@ -153,10 +145,7 @@ class SomeClass:
         """
     )
     assert len(ret) == 1
-    assert list(ret)[0].endswith(
-        "QGS105 Do not pass iface (QgisInterface) as an argument, instead import "
-        "it: 'from qgis.utils import iface'"
-    )
+    assert list(ret)[0].endswith(QGS105)
 
 
 def test_QGS106_pass():
@@ -172,3 +161,8 @@ def test_QGS106():
         "1:0 QGS106 Use 'from osgeo import gdal' instead of 'import gdal'",
         "1:0 QGS106 Use 'from osgeo import ogr' instead of 'import ogr'",
     }
+
+
+def test_QGS107():
+    ret = _results("from qgis.utils import iface")
+    assert ret == {"1:0 " + QGS107}
