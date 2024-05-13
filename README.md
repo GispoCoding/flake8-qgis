@@ -28,29 +28,32 @@ Just call `flake8 .` in your package or `flake your.py`.
 
 
 ## Rules
+Rule | Description
+--- | ---
+[QGS101](#QGS101) | Avoid using from-imports from qgis protected members
+[QGS102](#QGS102) | Avoid using imports from qgis protected members
+[QGS103](#QGS103) | Avoid using from-imports from PyQt directly
+[QGS104](#QGS104) | Avoid using imports from PyQt directly
+[QGS105](#QGS105) | Avoid passing QgisInterface as an argument
+[QGS106](#QGS106) | Avoid importing gdal directly, import it from osgeo package
 
-* `QGS101`: Don't use from-imports from qgis protected members ([example](#QGS101))
-* `QGS102`: Don't use imports from qgis protected members ([example](#QGS102))
-* `QGS103`: Don't use from-imports from PyQt directly ([example](#QGS103))
-* `QGS104`: Don't use imports from PyQt directly ([example](#QGS104))
-* `QGS105`: Don't pass QgisInterface as an argument ([example](#QGS105))
-* `QGS106`: Don't import gdal directly, import if from osgeo package ([example](#QGS106))
+Please check the Examples section below for good and bad usage examples for each rule.
 
-
-
-You might have good reasons to ignore some rules.
-To do that, use the standard Flake8 configuration. For example, within the `setup.cfg` file:
-
+While it's important to adhere to these rules, there might be good reasons to ignore some of them. You can do so by using the standard Flake8 configuration. For example, in the `setup.cfg` file:
 ```python
 [flake8]
 ignore = QGS101, QGS102
 ```
 
 
-## Examples
-
 ### QGS101
 
+Avoid using from-imports from qgis protected members
+
+#### Why is this bad?
+Protected members are potentially unstable across software versions. Future changes in protected members might cause problems.
+
+#### Example
 ```python
 # Bad
 from qgis._core import QgsMapLayer, QgsVectorLayer
@@ -63,6 +66,13 @@ from qgis.core import QgsApplication
 
 ### QGS102
 
+Avoid using imports from qgis protected members
+
+#### Why is this bad?
+Protected members are potentially unstable across software versions. Future changes in protected members might cause problems.
+
+#### Example
+
 ```python
 # Bad
 import qgis._core.QgsVectorLayer as QgsVectorLayer
@@ -72,6 +82,13 @@ import qgis.core.QgsVectorLayer as QgsVectorLayer
 ```
 
 ### QGS103
+
+Avoid using from-imports from PyQt directly
+
+#### Why is this bad?
+Importing directly from PyQt might create conflict with QGIS bundled PyQt version
+
+#### Example
 
 ```python
 # Bad
@@ -83,6 +100,13 @@ from qgis.PyQt.QtCore import pyqtSignal
 
 ### QGS104
 
+Avoid using imports from PyQt directly
+
+#### Why is this bad?
+Importing directly from PyQt might create conflict with QGIS bundled PyQt version
+
+#### Example
+
 ```python
 # Bad
 import PyQt5.QtCore.pyqtSignal as pyqtSignal
@@ -92,6 +116,15 @@ import qgis.PyQt.QtCore.pyqtSignal as pyqtSignal
 ```
 
 ### QGS105
+
+Avoid passing QgisInterface as an argument
+
+#### Why is this bad?
+It is much easier to import QgisInterface, and it's easier to [mock](https://github.com/GispoCoding/pytest-qgis#hooks) it as well when writing tests. This approach is not however documented properly, so the API might change at some point to exclude this.
+
+This rule can be excluded safely since this is only a matter of preference. Passing iface as an argument is the documented way of getting QgisInterface in plugins. However, it requires writing more code.
+
+#### Example
 
 ```python
 # Bad: iface passed as argument
@@ -113,6 +146,12 @@ def classFactory(iface):
 ```
 
 ### QGS106
+Avoid importing gdal directly, import it from osgeo package
+
+#### Why is this bad?
+Importing directly from gdal might create conflict with different gdal versions
+
+#### Example
 
 ```python
 # Bad
