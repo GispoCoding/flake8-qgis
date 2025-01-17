@@ -50,6 +50,8 @@ ignore = QGS101, QGS102
 
 Avoid using from-imports from qgis protected members
 
+An exception is made for importing `qgis._3d` (since flake-qgis 1.1.0). The underscore in the package name is used to prevent the name from starting with a number, ensuring it is a valid package name.
+
 #### Why is this bad?
 Protected members are potentially unstable across software versions. Future changes in protected members might cause problems.
 
@@ -67,6 +69,8 @@ from qgis.core import QgsApplication
 ### QGS102
 
 Avoid using imports from qgis protected members
+
+An exception is made for importing `qgis._3d` (since flake-qgis 1.1.0). The underscore in the package name is used to prevent the name from starting with a number, ensuring it is a valid package name.
 
 #### Why is this bad?
 Protected members are potentially unstable across software versions. Future changes in protected members might cause problems.
