@@ -161,3 +161,23 @@ import ogr
 # Good
 from osgeo import gdal
 ```
+
+## Development
+
+Install development dependencies
+```
+python -m venv .venv
+# activate the venv
+python -m pip install -U pip
+pip install pip-tools
+pip-sync requirements.txt requirements-dev.txt requirements-lint.txt
+```
+
+### Updating dependencies
+Edit `.in` dependency files then run
+
+```
+uv pip compile --universal --python 3.9 setup.cfg -o requirements.txt
+uv pip compile --universal --python 3.9 requirements-dev.in -o requirements-dev.txt
+uv pip compile --universal --python 3.9 requirements-lint.in -o requirements-lint.txt
+```
