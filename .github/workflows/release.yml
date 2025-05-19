@@ -57,6 +57,6 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        run: gh release create ${{github.ref_name}} dist/* --generate-notes
+        run: gh release create ${{github.ref_name}} dist/* --generate-notes --draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
